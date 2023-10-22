@@ -1,27 +1,49 @@
-import React from 'react';
-import { Item, List, Button } from './ContactList.styled';
-
 import { useSelector, useDispatch } from 'react-redux';
-import { getVisibleContacts } from 'redux/selectors';
-import { removeContact } from 'redux/contactsSlice';
+import { deleteContact } from '../../redux/operations';
 
-const ContactList = () => {
-  const contacts = useSelector(getVisibleContacts);
+import { selectContacts, selectContactsFilter } from '../../redux/selectors';
+import { Button, Item, List } from './ContactList.styled';
+
+// компонент використовую список контактів з стору через useSelector
+export function ContactList() {
+  const contacts = useSelector(selectContacts);
+
+  const filterValue = useSelector(selectContactsFilter).toLowerCase();
+
+  // надсилання екшона видалення контакту за допомогою useDispatch
   const dispatch = useDispatch();
-  const handleDelete = () => dispatch(removeContact());
+
+  const handleDelete = evt => {
+    dispatch(deleteContact(evt.currentTarget.id));
+
+    // ^ сповіщення має відображатись у featch??
+    alert(`This contact is delited from your phonebook!`);
+  };
+
+  const getVisibilityContacts = () => {
+    if (!filterValue || filterValue === '') {
+      return contacts;
+    }
+
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filterValue)
+    );
+  };
+
+  const visibilityContacts = getVisibilityContacts();
 
   return (
     <List>
-      {contacts.map(({ id, name, number }) => (
-        <Item key={id}>
+      {visibilityContacts.map(contact => (
+        <Item key={contact.id}>
           <p>
-            {name}: {number}
+            {contact.name}: <span>{contact.phone}</span>
           </p>
-          <Button onClick={handleDelete}>Delete</Button>
+          <Button type="button" id={contact.id} onClick={handleDelete}>
+            Delete
+          </Button>
         </Item>
       ))}
     </List>
   );
-};
-
-export default ContactList;
+}

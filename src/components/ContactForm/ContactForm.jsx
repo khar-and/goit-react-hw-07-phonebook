@@ -1,57 +1,36 @@
-import { useState } from 'react';
-import { Button, Form, Input, Label } from './ContactForm.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from '../../redux/operations';
+import { selectContacts } from '../../redux/selectors';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { getVisibleContacts } from 'redux/selectors';
-import { addContact } from 'redux/contactsSlice';
+import { Form, Button, Input, Label } from './ContactForm.styled';
 
-const ContactForm = ({ onSubmit }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-
-  const contacts = useSelector(getVisibleContacts);
+const ContactForm = () => {
   const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
 
-  const handleChangeInput = evt => {
-    const { name, value } = evt.currentTarget;
-
-    switch (name) {
-      case 'name':
-        setName(value);
-        break;
-      case 'number':
-        setNumber(value);
-        break;
-      default:
-        return;
-    }
-  };
-
-  const handleSubmitForm = evt => {
+  function handlerSubmit(evt) {
     evt.preventDefault();
+    const form = evt.target;
+    const name = form.name.value;
+    const phone = form.number.value;
 
-    const isInContacts = contacts.some(
-      contact => contact.name.toLowerCase().trim() === name.toLowerCase().trim()
-    );
-
-    // Проверяет, существует ли контакт с таким же именем в списке контактов. Если контакт уже существует, выводится предупреждение.
-    if (isInContacts) {
-      alert(`${name} is already in contacts`);
-      return;
+    if (
+      contacts.find(
+        contact => contact.name.toLowerCase() === name.toLowerCase()
+      )
+    ) {
+      return alert(`${name} is alredy in contacts.`);
     }
 
-    // Вызов функции onSubmit из родительского компонента с передачей объекта контакта.
-    dispatch(addContact({ name, number }));
-    setName('');
-    setNumber('');
+    dispatch(addContact({ name, phone }));
 
-    // onSubmit({ name, number });
-    // setName('');
-    // setNumber('');
-  };
+    alert(`${name} is added to the contact list!`);
+
+    form.reset();
+  }
 
   return (
-    <Form onSubmit={handleSubmitForm}>
+    <Form onSubmit={handlerSubmit}>
       <Label>
         Name{' '}
         <Input
@@ -59,9 +38,7 @@ const ContactForm = ({ onSubmit }) => {
           name="name"
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          value={name}
           required
-          onChange={handleChangeInput}
         />
       </Label>
       <Label>
@@ -71,11 +48,10 @@ const ContactForm = ({ onSubmit }) => {
           name="number"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          value={number}
           required
-          onChange={handleChangeInput}
         />
       </Label>
+
       <Button type="submit">Add contact</Button>
     </Form>
   );

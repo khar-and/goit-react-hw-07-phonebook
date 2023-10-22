@@ -1,21 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// Исходное состояние фильтра
-const initialFilterState = '';
+const initialStateFilters = { filter: '' };
 
-// Создание slice фильтра с использованием createSlice
-const filterSlice = createSlice({
-  name: 'filter', // Имя slice фильтра
-  initialState: initialFilterState, // Начальное состояние фильтра
+const filtersSlice = createSlice({
+  name: 'filters',
+  initialState: initialStateFilters,
   reducers: {
-    changeFilter(_, action) {
-      return action.payload; // Обновление значения фильтра на основе переданного действия
+    setFilterContacts: {
+      reducer(state, action) {
+        state.filter = action.payload;
+      },
     },
   },
 });
 
-// Экспорт действия changeFilter из slice фильтра
-export const { changeFilter } = filterSlice.actions;
-
-// Экспорт редьюсера фильтра из slice фильтра
-export const filterReducer = filterSlice.reducer;
+export const { setFilterContacts } = filtersSlice.actions;
+export const filtersReducer = filtersSlice.reducer;
